@@ -1,12 +1,14 @@
 package com.example.demo.service.impli;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.Entities.Users;
+import com.example.demo.Exception_handling.ResourceNotFoundException;
 import com.example.demo.Repository.user_repo;
 import com.example.demo.payloads.users_dto;
 import com.example.demo.service.user_service;
@@ -33,26 +35,46 @@ public class user_service_impli implements user_service {
 
 	@Override
 	public List<users_dto> get_users() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Users> list= this.repo.findAll();
+		
+		List<users_dto> dto =list.stream().map(user->this.Userstouser_dto(user)).collect(Collectors.toList());
+		return dto;
 	}
 
 	@Override
 	public users_dto getbyid(int userid) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Users users = this.repo.findById(userid).orElseThrow(()->new ResourceNotFoundException("Users","userid",userid));
+		
+		
+		return this.Userstouser_dto(users);
 	}
 
 	@Override
 	public void deleteuser(int userid) {
-		// TODO Auto-generated method stub
+		
+		Users users = this.repo.findById(userid).orElseThrow(()->new ResourceNotFoundException("Users", "userid", userid));
+		
+		this.repo.delete(users);
 
 	}
 
 	@Override
 	public users_dto update_user(users_dto dto, int userid) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Users users = this.repo.findById(userid).orElseThrow(()->new ResourceNotFoundException("Users", "userid", userid));
+	
+		users.setUsername(dto.getUsername());
+		
+		users.setEmail(dto.getEmail());
+		
+		users.setPassword(dto.getPassword());
+		
+		Users update_users = this.repo.save(users);
+		
+		users_dto userdto = this.Userstouser_dto(update_users);
+		
+		return  userdto;
 	}
 	public Users users_dtotoUsers(users_dto dto) {
 		
